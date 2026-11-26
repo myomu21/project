@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메인 트윗 메이커</title>
+  <link rel="stylesheet" href="./style.css" />
+  <!-- 이미지 캡처 저장을 위한 html2canvas 라이브러리 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+  <!-- 상단 조작 패널 -->
+  <div class="control-bar">
+    <button onclick="addSlot('image')">+ 이미지란 추가</button>
+    <button onclick="addSlot('text')">+ 글란 추가</button>
+    <span id="slot-counter" style="font-size: 13px; color: #555;">(6 / 6)</span>
+
+    <select id="theme-select" onchange="changeTheme(this.value)">
+      <option value="light">테마: 심플 화이트</option>
+      <option value="dark">테마: 다크 모드</option>
+      <option value="pastel">테마: 파스텔 핑크</option>
+    </select>
+
+    <button class="btn-primary" onclick="downloadImage()">이미지로 저장 (PNG)</button>
+  </div>
+
+  <p class="guide-text">💡 모든 텍스트는 클릭해서 직접 수정할 수 있으며, 이미지 칸을 누르면 사진을 업로드할 수 있습니다.</p>
+
+  <!-- 메인 트윗 캔버스 영역 -->
+  <div class="canvas-wrapper">
+    <div id="maintweet-canvas">
+
+      <!-- 1. 왼쪽: 프로필 박스 -->
+      <div class="box profile-box">
+        <div class="avatar-upload" onclick="document.getElementById('avatar-input').click()">
+          <span id="avatar-placeholder">이미지</span>
+          <img id="avatar-preview" alt="프로필 이미지" />
+          <input type="file" id="avatar-input" accept="image/*" hidden onchange="previewAvatar(event)" />
+        </div>
+
+        <div class="editable profile-name" contenteditable="true">이름</div>
+        <div class="editable profile-id" contenteditable="true">@user_id</div>
+
+        <div class="profile-details">
+          <div class="detail-item">
+            <span class="detail-label">나이</span>
+            <div class="editable detail-value" contenteditable="true">성인 / 비공개</div>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">성별</span>
+            <div class="editable detail-value" contenteditable="true">여성 / 남성 / 기타</div>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">분야 / 포지션</span>
+            <div class="editable detail-value" contenteditable="true">글 · 그림 · 소비</div>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">기타</span>
+            <div class="editable detail-value" contenteditable="true">자유롭게 소개를 적어주세요.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 가운데: 메인 박스 (최대 6칸 + 하단 글 설명) -->
+      <div class="box main-box">
+        <div class="slots-grid" id="slots-grid">
+          <!-- 기본 6개 이미지 슬롯 생성 -->
+        </div>
+
+        <div class="editable main-description" contenteditable="true">
+          글 설명 (자신에 대한 소개나 한 줄 메세지를 입력하세요)
+        </div>
+      </div>
+
+      <!-- 3. 오른쪽: 서브 박스 -->
+      <div class="box sub-box">
+        <div class="editable sub-title" contenteditable="true">서브 박스</div>
+
+        <div class="sub-section">
+          <span class="sub-section-title">활동 성향 (클릭하여 선택)</span>
+          <div class="tag-list">
+            <span class="tag active" onclick="this.classList.toggle('active')">#일상트</span>
+            <span class="tag" onclick="this.classList.toggle('active')">#연성</span>
+            <span class="tag active" onclick="this.classList.toggle('active')">#덕질</span>
+            <span class="tag" onclick="this.classList.toggle('active')">#교류선호</span>
+            <span class="tag" onclick="this.classList.toggle('active')">#마음위주</span>
+          </div>
+        </div>
+
+        <div class="sub-section">
+          <span class="sub-section-title">LIKE (좋아하는 것)</span>
+          <div class="editable sub-text" contenteditable="true">• 본진 장르 및 최애<br>• 좋아하는 소재나 분위기</div>
+        </div>
+
+        <div class="sub-section">
+          <span class="sub-section-title">AVOID (지뢰 / 주의사항)</span>
+          <div class="editable sub-text" contenteditable="true">• 피하고 싶은 요소가 있다면 적어주세요. (알아서 피해갑니다)</div>
+        </div>
+
+        <div class="sub-section">
+          <span class="sub-section-title">FUB FREE / 이별</span>
+          <div class="editable sub-text" contenteditable="true">• 팔로우 자유 / 이별은 블언블 부탁드립니다.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const MAX_SLOTS = 6;
+    const slotsGrid = document.getElementById('slots-grid');
+    const slotCounter = document.getElementById('slot-counter');
+
+    // 초기 6개 슬롯 세팅 (첨부 시안 기준)
+    window.onload = () => {
+      for (let i = 0; i < 6; i++) {
+        addSlot('image');
+      }
+    };
+
+    // 슬롯 개수 카운터 업데이트
+    function updateCounter() {
+      const currentCount = slotsGrid.children.length;
+      slotCounter.textContent = `(${currentCount} / ${MAX_SLOTS})`;
+    }
+
+    // 슬롯 추가 (type: 'image' 또는 'text')
+    function addSlot(type) {
+      if (slotsGrid.children.length >= MAX_SLOTS) {
+        alert('메인 박스의 란은 최대 6개까지만 추가할 수 있습니다.');
+        return;
+      }
+
+      const slot = document.createElement('div');
+      slot.className = `slot-item ${type}-slot`;
+
+      // 삭제 버튼
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-slot-btn';
+      delBtn.innerHTML = '×';
+      delBtn.title = '칸 삭제';
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        slot.remove();
+        updateCounter();
+      };
+      slot.appendChild(delBtn);
+
+      if (type === 'image') {
+        const placeholder = document.createElement('span');
+        placeholder.className = 'slot-placeholder';
+        placeholder.textContent = '이미지';
+
+        const img = document.createElement('img');
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.hidden = true;
+
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              img.src = ev.target.result;
+              img.style.display = 'block';
+              placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+          }
+        };
+
+        slot.onclick = () => input.click();
+        slot.appendChild(placeholder);
+        slot.appendChild(img);
+        slot.appendChild(input);
+      } else {
+        const textDiv = document.createElement('div');
+        textDiv.className = 'editable slot-text-content';
+        textDiv.contentEditable = 'true';
+        textDiv.textContent = '내용을 입력하세요...';
+        slot.appendChild(textDiv);
+      }
+
+      slotsGrid.appendChild(slot);
+      updateCounter();
+    }
+
+    // 프로필 이미지 미리보기
+    function previewAvatar(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.getElementById('avatar-preview');
+          img.src = e.target.result;
+          img.style.display = 'block';
+          document.getElementById('avatar-placeholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // 테마 변경
+    function changeTheme(theme) {
+      document.body.className = '';
+      if (theme !== 'light') {
+        document.body.classList.add(`theme-${theme}`);
+      }
+    }
+
+    // PNG 이미지 다운로드
+    function downloadImage() {
+      const target = document.getElementById('maintweet-canvas');
+      const delButtons = document.querySelectorAll('.delete-slot-btn');
+      delButtons.forEach(btn => btn.style.display = 'none');
+
+      html2canvas(target, {
+        scale: 2,
+        useCORS: true
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'maintweet.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        delButtons.forEach(btn => btn.style.display = 'flex');
+      });
+    }
+  </script>
+</body>
+</html>
