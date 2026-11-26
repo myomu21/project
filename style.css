@@ -140,6 +140,24 @@ body {
   color: #475569;
 }
 
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--ui-primary);
+  cursor: pointer;
+}
+
 input[type="text"],
 textarea {
   width: 100%;
@@ -204,7 +222,7 @@ input[type="color"] {
 }
 
 .blur-row span:last-child {
-  min-width: 36px;
+  min-width: 42px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -265,13 +283,23 @@ input[type="color"] {
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .dynamic-item-top {
   display: flex;
   gap: 6px;
   align-items: center;
+}
+
+.img-transform-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .sidebar-footer {
@@ -344,7 +372,7 @@ input[type="color"] {
 /* ================= 메인 트윗 캔버스 (실제 저장 영역) ================= */
 #maintweet-canvas {
   width: 1120px;
-  min-height: 630px;
+  height: 630px;
   background-color: var(--canvas-bg);
   border: 2px solid var(--accent-color);
   padding: 24px;
@@ -356,7 +384,6 @@ input[type="color"] {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
-/* 캔버스 전체 배경 레이어 (블러 적용용) */
 .canvas-bg-layer {
   position: absolute;
   inset: 0;
@@ -373,9 +400,9 @@ input[type="color"] {
   position: relative;
   z-index: 1;
   overflow: hidden;
+  height: 100%;
 }
 
-/* 박스 내부 배경 이미지 레이어 */
 .box-bg-layer {
   position: absolute;
   inset: 0;
@@ -407,9 +434,9 @@ input[type="color"] {
   flex: 1;
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 
-/* 박스별 테마 변수 매핑 (투명도 + 뒷배경 블러) */
 #profile-box {
   background-color: var(--profile-bg-rgba);
   backdrop-filter: blur(var(--profile-backdrop-blur));
@@ -425,7 +452,7 @@ input[type="color"] {
   -webkit-backdrop-filter: blur(var(--main-backdrop-blur));
   color: var(--main-text);
   border: 1.5px solid var(--accent-color);
-  padding: 20px 16px;
+  padding: 18px 16px;
 }
 
 #sub-box {
@@ -506,17 +533,18 @@ input[type="color"] {
   word-break: keep-all;
 }
 
-/* 2. 메인 박스 (1~6개 이미지 전용 레이아웃) */
+/* 2. 메인 박스 (고정 크기 + 확대/축소/이동 + 캡션 선택형) */
 .main-content {
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
 }
 
 .image-gallery {
-  flex: 1;
+  height: 416px;
+  flex-shrink: 0;
   display: grid;
-  gap: 12px;
-  min-height: 360px;
+  gap: 10px;
+  overflow: hidden;
 }
 
 .image-gallery.count-0 {
@@ -562,20 +590,45 @@ input[type="color"] {
   grid-template-rows: repeat(2, 1fr);
 }
 
+/* 이미지 카드 셀 (고정 크기를 절대 넘지 않음) */
 .gallery-cell {
   border: 1.5px solid var(--accent-color);
   background-color: rgba(128, 128, 128, 0.06);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   overflow: hidden;
-  min-height: 100px;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
 }
 
-.gallery-cell img {
+.gallery-img-viewport {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-img-viewport.has-image {
+  cursor: grab;
+}
+
+.gallery-img-viewport.has-image:active {
+  cursor: grabbing;
+}
+
+.gallery-img-viewport img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transform-origin: center center;
+  user-select: none;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .gallery-empty-text {
@@ -584,17 +637,36 @@ input[type="color"] {
   opacity: 0.65;
 }
 
+/* 이미지 아래 작은 이름(캡션) 칸 */
+.gallery-caption {
+  height: 24px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--accent-color);
+  background-color: rgba(128, 128, 128, 0.06);
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .main-desc-box {
   border: 1.5px solid var(--accent-color);
-  padding: 12px 16px;
-  min-height: 60px;
+  padding: 10px 14px;
+  height: 62px;
+  flex-shrink: 0;
   font-size: 13.5px;
-  line-height: 1.5;
+  line-height: 1.45;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
   white-space: pre-wrap;
+  overflow: hidden;
   background-color: rgba(128, 128, 128, 0.03);
 }
 
