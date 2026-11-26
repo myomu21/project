@@ -14,45 +14,72 @@
     <aside class="editor-sidebar" id="editor-sidebar">
       <div class="sidebar-header">
         <h1>메인 트윗 편집기</h1>
-        <p>왼쪽에서 내용을 수정하면 오른쪽에 실시간 반영됩니다.</p>
+        <p>항목 추가/삭제, 박스별 색상·배경·블러를 자유롭게 설정하세요.</p>
       </div>
 
       <div class="sidebar-scroll">
-        <!-- 1. 색상 커스텀 -->
+        <!-- 1. 전체 배경 & 테두리 -->
         <div class="control-group">
           <div class="group-title">
-            <span>테마 & 색상 변경</span>
-            <button class="btn" style="padding: 4px 8px; font-size: 11px;" onclick="resetColors()">기본값</button>
+            <span>1. 전체 캔버스 배경 & 테두리</span>
+            <button class="btn" onclick="resetAllStyles()">초기화</button>
           </div>
-          <div class="color-grid">
-            <div class="color-item">
-              <span>전체 배경</span>
-              <input type="color" id="color-canvas-bg" value="#ffffff" oninput="updateColor('--canvas-bg', this.value)" />
+
+          <div class="color-mini-row">
+            <div class="color-mini-item">
+              <span>캔버스 배경색</span>
+              <input type="color" id="c-canvas-bg" value="#ffffff" oninput="setCssVar('--canvas-bg', this.value)" />
             </div>
-            <div class="color-item">
-              <span>박스 배경</span>
-              <input type="color" id="color-box-bg" value="#ffffff" oninput="updateColor('--box-bg', this.value)" />
-            </div>
-            <div class="color-item">
-              <span>테두리/포인트</span>
-              <input type="color" id="color-accent" value="#222222" oninput="updateColor('--accent-color', this.value)" />
+            <div class="color-mini-item">
+              <span>테두리 색상</span>
+              <input type="color" id="c-accent" value="#222222" oninput="setCssVar('--accent-color', this.value)" />
             </div>
           </div>
-          <div class="color-grid" style="grid-template-columns: repeat(2, 1fr);">
-            <div class="color-item">
-              <span>기본 글씨색</span>
-              <input type="color" id="color-text-main" value="#111111" oninput="updateColor('--text-main', this.value)" />
+
+          <div class="field">
+            <label>캔버스 배경 이미지 & 블러</label>
+            <div class="btn-group">
+              <button class="btn" onclick="clearBgImage('canvas')">배경 없음</button>
+              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-canvas').click()">배경 사진</button>
+              <input type="file" id="bg-input-canvas" accept="image/*" hidden onchange="handleBgUpload('canvas', event)" />
             </div>
-            <div class="color-item">
-              <span>보조 글씨색</span>
-              <input type="color" id="color-text-sub" value="#555555" oninput="updateColor('--text-sub', this.value)" />
+            <div class="blur-row">
+              <span>블러</span>
+              <input type="range" id="blur-canvas" min="0" max="20" value="0" oninput="setBlur('--canvas-blur', 'blur-val-canvas', this.value)" />
+              <span id="blur-val-canvas">0px</span>
             </div>
           </div>
         </div>
 
         <!-- 2. 프로필 박스 설정 -->
         <div class="control-group">
-          <div class="group-title">1. 프로필 박스</div>
+          <div class="group-title">2. 프로필 박스</div>
+
+          <div class="sub-card-box">
+            <div class="sub-card-title">박스 스타일 (색상 / 배경 / 글자색)</div>
+            <div class="color-mini-row">
+              <div class="color-mini-item">
+                <span>배경색</span>
+                <input type="color" id="c-profile-bg" value="#ffffff" oninput="setCssVar('--profile-bg', this.value)" />
+              </div>
+              <div class="color-mini-item">
+                <span>글자색</span>
+                <input type="color" id="c-profile-text" value="#111111" oninput="setCssVar('--profile-text', this.value)" />
+              </div>
+            </div>
+            <div class="btn-group">
+              <button class="btn" onclick="setQuickTextColor('--profile-text', 'c-profile-text', '#111111')">어두운 글씨</button>
+              <button class="btn" onclick="setQuickTextColor('--profile-text', 'c-profile-text', '#ffffff')">밝은 글씨</button>
+              <button class="btn" onclick="clearBgImage('profile')">배경 사진 삭제</button>
+              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-profile').click()">배경 사진</button>
+              <input type="file" id="bg-input-profile" accept="image/*" hidden onchange="handleBgUpload('profile', event)" />
+            </div>
+            <div class="blur-row">
+              <span>배경 블러</span>
+              <input type="range" id="blur-profile" min="0" max="20" value="0" oninput="setBlur('--profile-blur', 'blur-val-profile', this.value)" />
+              <span id="blur-val-profile">0px</span>
+            </div>
+          </div>
 
           <div class="field">
             <label>프로필 사진</label>
@@ -74,42 +101,54 @@
             </div>
           </div>
 
-          <div class="field-row">
-            <div class="field">
-              <label>나이</label>
-              <input type="text" value="성인 / 비공개" oninput="syncText('prev-age', this.value)" />
-            </div>
-            <div class="field">
-              <label>성별</label>
-              <input type="text" value="여성 / 남성 / 기타" oninput="syncText('prev-gender', this.value)" />
-            </div>
-          </div>
-
           <div class="field">
-            <label>분야 / 포지션</label>
-            <input type="text" value="글 · 그림 · 소비" oninput="syncText('prev-type', this.value)" />
-          </div>
-
-          <div class="field">
-            <label>기타 소개</label>
-            <textarea oninput="syncText('prev-etc', this.value)">자유롭게 소개를 적어주세요.</textarea>
+            <div class="group-title">
+              <label>프로필 항목 (직접 추가·수정·삭제)</label>
+              <button class="btn btn-outline-primary" onclick="addProfileField()">+ 항목 추가</button>
+            </div>
+            <div id="profile-fields-editor" class="slot-editor-list"></div>
           </div>
         </div>
 
-        <!-- 3. 메인 박스 설정 (최대 6칸 추가/삭제) -->
+        <!-- 3. 메인 박스 설정 (이미지 1~6개 전용) -->
         <div class="control-group">
-          <div class="group-title">
-            <span>2. 메인 박스 칸 (<span id="slot-count-label">6</span> / 6)</span>
+          <div class="group-title">3. 메인 박스</div>
+
+          <div class="sub-card-box">
+            <div class="sub-card-title">박스 스타일 (색상 / 배경 / 글자색)</div>
+            <div class="color-mini-row">
+              <div class="color-mini-item">
+                <span>배경색</span>
+                <input type="color" id="c-main-bg" value="#ffffff" oninput="setCssVar('--main-bg', this.value)" />
+              </div>
+              <div class="color-mini-item">
+                <span>글자색</span>
+                <input type="color" id="c-main-text" value="#111111" oninput="setCssVar('--main-text', this.value)" />
+              </div>
+            </div>
             <div class="btn-group">
-              <button class="btn btn-outline-primary" style="padding: 5px 9px; font-size: 12px;" onclick="addSlot('image')">+ 이미지란</button>
-              <button class="btn btn-outline-primary" style="padding: 5px 9px; font-size: 12px;" onclick="addSlot('text')">+ 글란</button>
+              <button class="btn" onclick="setQuickTextColor('--main-text', 'c-main-text', '#111111')">어두운 글씨</button>
+              <button class="btn" onclick="setQuickTextColor('--main-text', 'c-main-text', '#ffffff')">밝은 글씨</button>
+              <button class="btn" onclick="clearBgImage('main')">배경 사진 삭제</button>
+              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-main').click()">배경 사진</button>
+              <input type="file" id="bg-input-main" accept="image/*" hidden onchange="handleBgUpload('main', event)" />
+            </div>
+            <div class="blur-row">
+              <span>배경 블러</span>
+              <input type="range" id="blur-main" min="0" max="20" value="0" oninput="setBlur('--main-blur', 'blur-val-main', this.value)" />
+              <span id="blur-val-main">0px</span>
             </div>
           </div>
 
-          <!-- 동적으로 생성되는 각 칸의 편집 UI -->
-          <div class="slot-editor-list" id="slot-editor-list"></div>
+          <div class="field">
+            <div class="group-title">
+              <span>이미지 칸 (<span id="img-count-label">6</span> / 6)</span>
+              <button class="btn btn-outline-primary" onclick="addImageSlot()">+ 이미지 추가</button>
+            </div>
+            <div id="image-slots-editor" class="slot-editor-list"></div>
+          </div>
 
-          <div class="field" style="margin-top: 6px;">
+          <div class="field">
             <label>하단 글 설명</label>
             <textarea oninput="syncText('prev-main-desc', this.value)">글 설명 (자신에 대한 소개나 한 줄 메세지를 입력하세요)</textarea>
           </div>
@@ -117,7 +156,33 @@
 
         <!-- 4. 서브 박스 설정 -->
         <div class="control-group">
-          <div class="group-title">3. 서브 박스</div>
+          <div class="group-title">4. 서브 박스</div>
+
+          <div class="sub-card-box">
+            <div class="sub-card-title">박스 스타일 (색상 / 배경 / 글자색)</div>
+            <div class="color-mini-row">
+              <div class="color-mini-item">
+                <span>배경색</span>
+                <input type="color" id="c-sub-bg" value="#ffffff" oninput="setCssVar('--sub-bg', this.value)" />
+              </div>
+              <div class="color-mini-item">
+                <span>글자색</span>
+                <input type="color" id="c-sub-text" value="#111111" oninput="setCssVar('--sub-text', this.value)" />
+              </div>
+            </div>
+            <div class="btn-group">
+              <button class="btn" onclick="setQuickTextColor('--sub-text', 'c-sub-text', '#111111')">어두운 글씨</button>
+              <button class="btn" onclick="setQuickTextColor('--sub-text', 'c-sub-text', '#ffffff')">밝은 글씨</button>
+              <button class="btn" onclick="clearBgImage('sub')">배경 사진 삭제</button>
+              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-sub').click()">배경 사진</button>
+              <input type="file" id="bg-input-sub" accept="image/*" hidden onchange="handleBgUpload('sub', event)" />
+            </div>
+            <div class="blur-row">
+              <span>배경 블러</span>
+              <input type="range" id="blur-sub" min="0" max="20" value="0" oninput="setBlur('--sub-blur', 'blur-val-sub', this.value)" />
+              <span id="blur-val-sub">0px</span>
+            </div>
+          </div>
 
           <div class="field">
             <label>서브 박스 제목</label>
@@ -125,31 +190,15 @@
           </div>
 
           <div class="field">
-            <label>활동 성향 태그 (클릭하여 강조)</label>
-            <div class="tag-toggle-wrap" id="tag-toggle-wrap">
-              <!-- JS로 렌더링 -->
+            <div class="group-title">
+              <label>서브 박스 항목 (직접 추가·수정·삭제)</label>
+              <button class="btn btn-outline-primary" onclick="addSubField()">+ 항목 추가</button>
             </div>
-          </div>
-
-          <div class="field">
-            <label>LIKE (좋아하는 것)</label>
-            <textarea oninput="syncText('prev-sub-like', this.value)">• 본진 장르 및 최애
-• 좋아하는 소재나 분위기</textarea>
-          </div>
-
-          <div class="field">
-            <label>AVOID (지뢰 / 주의사항)</label>
-            <textarea oninput="syncText('prev-sub-avoid', this.value)">• 피하고 싶은 요소가 있다면 적어주세요.</textarea>
-          </div>
-
-          <div class="field">
-            <label>FUB FREE / 이별 기준</label>
-            <textarea oninput="syncText('prev-sub-fub', this.value)">• 팔로우 자유 / 이별은 블언블 부탁드립니다.</textarea>
+            <div id="sub-fields-editor" class="slot-editor-list"></div>
           </div>
         </div>
       </div>
 
-      <!-- 하단 저장 버튼 -->
       <div class="sidebar-footer">
         <button class="btn-download" onclick="downloadImage()">이미지로 저장 (PNG)</button>
       </div>
@@ -163,70 +212,37 @@
 
       <div class="canvas-center-stage">
         <div id="maintweet-canvas">
+          <div class="canvas-bg-layer" id="bg-layer-canvas"></div>
+
           <!-- 1. 프로필 박스 -->
-          <div class="box profile-box">
-            <div class="avatar-circle">
-              <span id="prev-avatar-placeholder">이미지</span>
-              <img id="prev-avatar-img" alt="프로필" />
-            </div>
-
-            <div class="preview-name" id="prev-name">이름</div>
-            <div class="preview-id" id="prev-id">@user_id</div>
-
-            <div class="profile-info-list">
-              <div>
-                <div class="info-block-label">나이</div>
-                <div class="info-block-text" id="prev-age">성인 / 비공개</div>
+          <div class="box" id="profile-box">
+            <div class="box-bg-layer" id="bg-layer-profile"></div>
+            <div class="box-content profile-content">
+              <div class="avatar-circle">
+                <span id="prev-avatar-placeholder">이미지</span>
+                <img id="prev-avatar-img" alt="프로필" />
               </div>
-              <div>
-                <div class="info-block-label">성별</div>
-                <div class="info-block-text" id="prev-gender">여성 / 남성 / 기타</div>
-              </div>
-              <div>
-                <div class="info-block-label">분야 / 포지션</div>
-                <div class="info-block-text" id="prev-type">글 · 그림 · 소비</div>
-              </div>
-              <div>
-                <div class="info-block-label">기타</div>
-                <div class="info-block-text" id="prev-etc">자유롭게 소개를 적어주세요.</div>
-              </div>
+              <div class="preview-name" id="prev-name">이름</div>
+              <div class="preview-id" id="prev-id">@user_id</div>
+              <div class="dynamic-preview-list" id="prev-profile-fields"></div>
             </div>
           </div>
 
           <!-- 2. 메인 박스 -->
-          <div class="box main-box">
-            <div class="slots-grid" id="prev-slots-grid">
-              <!-- JS로 렌더링 -->
+          <div class="box" id="main-box">
+            <div class="box-bg-layer" id="bg-layer-main"></div>
+            <div class="box-content main-content">
+              <div class="image-gallery count-6" id="prev-image-gallery"></div>
+              <div class="main-desc-box" id="prev-main-desc">글 설명 (자신에 대한 소개나 한 줄 메세지를 입력하세요)</div>
             </div>
-
-            <div class="main-desc-box" id="prev-main-desc">글 설명 (자신에 대한 소개나 한 줄 메세지를 입력하세요)</div>
           </div>
 
           <!-- 3. 서브 박스 -->
-          <div class="box sub-box">
-            <div class="preview-sub-title" id="prev-sub-title">서브 박스</div>
-
-            <div class="sub-block">
-              <div class="sub-block-label">활동 성향</div>
-              <div class="preview-tags" id="prev-tags">
-                <!-- JS로 렌더링 -->
-              </div>
-            </div>
-
-            <div class="sub-block">
-              <div class="sub-block-label">LIKE</div>
-              <div class="sub-block-text" id="prev-sub-like">• 본진 장르 및 최애
-• 좋아하는 소재나 분위기</div>
-            </div>
-
-            <div class="sub-block">
-              <div class="sub-block-label">AVOID</div>
-              <div class="sub-block-text" id="prev-sub-avoid">• 피하고 싶은 요소가 있다면 적어주세요.</div>
-            </div>
-
-            <div class="sub-block">
-              <div class="sub-block-label">FUB FREE / 이별</div>
-              <div class="sub-block-text" id="prev-sub-fub">• 팔로우 자유 / 이별은 블언블 부탁드립니다.</div>
+          <div class="box" id="sub-box">
+            <div class="box-bg-layer" id="bg-layer-sub"></div>
+            <div class="box-content sub-content">
+              <div class="preview-sub-title" id="prev-sub-title">서브 박스</div>
+              <div class="dynamic-preview-list" id="prev-sub-fields"></div>
             </div>
           </div>
         </div>
@@ -235,60 +251,110 @@
   </div>
 
   <script>
-    const MAX_SLOTS = 6;
-    // 메인 박스 슬롯 데이터 상태
-    let slots = [
-      { id: 1, type: 'image', imgSrc: '', text: '' },
-      { id: 2, type: 'image', imgSrc: '', text: '' },
-      { id: 3, type: 'image', imgSrc: '', text: '' },
-      { id: 4, type: 'image', imgSrc: '', text: '' },
-      { id: 5, type: 'image', imgSrc: '', text: '' },
-      { id: 6, type: 'image', imgSrc: '', text: '' }
+    const MAX_IMAGES = 6;
+
+    // 프로필 동적 항목 상태 (초기값은 예시일 뿐 자유롭게 수정·삭제·추가 가능)
+    let profileFields = [
+      { id: 1, label: '나이', value: '성인 / 비공개' },
+      { id: 2, label: '성별', value: '여성 / 남성 / 기타' },
+      { id: 3, label: '분야 · 포지션', value: '글 · 그림 · 소비' },
+      { id: 4, label: '기타', value: '자유롭게 소개를 적어주세요.' }
     ];
 
-    // 서브 박스 태그 데이터 상태
-    let tags = [
-      { label: '#일상트', active: true },
-      { label: '#연성', active: false },
-      { label: '#덕질', active: true },
-      { label: '#교류선호', active: false },
-      { label: '#마음위주', active: false }
+    // 메인 박스 이미지 전용 슬롯 (1~6개)
+    let imageSlots = [
+      { id: 1, imgSrc: '' },
+      { id: 2, imgSrc: '' },
+      { id: 3, imgSrc: '' },
+      { id: 4, imgSrc: '' },
+      { id: 5, imgSrc: '' },
+      { id: 6, imgSrc: '' }
+    ];
+
+    // 서브 박스 동적 항목 상태 (자유롭게 수정·삭제·추가 가능)
+    let subFields = [
+      { id: 1, label: 'LIKE', value: '• 본진 장르 및 최애\n• 좋아하는 소재나 분위기' },
+      { id: 2, label: 'AVOID', value: '• 피하고 싶은 요소가 있다면 적어주세요.' },
+      { id: 3, label: 'FUB FREE / 이별', value: '• 팔로우 자유 / 이별은 블언블 부탁드립니다.' }
     ];
 
     window.onload = () => {
-      renderSlots();
-      renderTags();
+      renderProfileFields();
+      renderImageSlots();
+      renderSubFields();
     };
 
-    // 텍스트 실시간 동기화
     function syncText(targetId, value) {
       document.getElementById(targetId).textContent = value;
     }
 
-    // CSS 변수 색상 실시간 변경
-    function updateColor(cssVar, value) {
-      document.documentElement.style.setProperty(cssVar, value);
+    function setCssVar(varName, value) {
+      document.documentElement.style.setProperty(varName, value);
     }
 
-    // 색상 초기화
-    function resetColors() {
+    function setQuickTextColor(varName, inputId, hex) {
+      setCssVar(varName, hex);
+      document.getElementById(inputId).value = hex;
+    }
+
+    function setBlur(varName, labelId, pxValue) {
+      setCssVar(varName, `${pxValue}px`);
+      document.getElementById(labelId).textContent = `${pxValue}px`;
+    }
+
+    function handleBgUpload(target, event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const layer = document.getElementById(`bg-layer-${target}`);
+        layer.style.backgroundImage = `url("${e.target.result}")`;
+        layer.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearBgImage(target) {
+      const layer = document.getElementById(`bg-layer-${target}`);
+      layer.style.backgroundImage = '';
+      layer.style.display = 'none';
+      const input = document.getElementById(`bg-input-${target}`);
+      if (input) input.value = '';
+    }
+
+    function resetAllStyles() {
       const defaults = {
         '--canvas-bg': '#ffffff',
-        '--box-bg': '#ffffff',
-        '--accent-color': '#222222',
-        '--text-main': '#111111',
-        '--text-sub': '#555555'
+        '--canvas-blur': '0px',
+        '--profile-bg': '#ffffff',
+        '--profile-text': '#111111',
+        '--profile-blur': '0px',
+        '--main-bg': '#ffffff',
+        '--main-text': '#111111',
+        '--main-blur': '0px',
+        '--sub-bg': '#ffffff',
+        '--sub-text': '#111111',
+        '--sub-blur': '0px',
+        '--accent-color': '#222222'
       };
-      document.getElementById('color-canvas-bg').value = defaults['--canvas-bg'];
-      document.getElementById('color-box-bg').value = defaults['--box-bg'];
-      document.getElementById('color-accent').value = defaults['--accent-color'];
-      document.getElementById('color-text-main').value = defaults['--text-main'];
-      document.getElementById('color-text-sub').value = defaults['--text-sub'];
+      Object.entries(defaults).forEach(([k, v]) => setCssVar(k, v));
 
-      Object.entries(defaults).forEach(([k, v]) => updateColor(k, v));
+      document.getElementById('c-canvas-bg').value = '#ffffff';
+      document.getElementById('c-accent').value = '#222222';
+      document.getElementById('c-profile-bg').value = '#ffffff';
+      document.getElementById('c-profile-text').value = '#111111';
+      document.getElementById('c-main-bg').value = '#ffffff';
+      document.getElementById('c-main-text').value = '#111111';
+      document.getElementById('c-sub-bg').value = '#ffffff';
+      document.getElementById('c-sub-text').value = '#111111';
+
+      ['canvas', 'profile', 'main', 'sub'].forEach((t) => {
+        clearBgImage(t);
+        document.getElementById(`blur-${t}`).value = 0;
+        document.getElementById(`blur-val-${t}`).textContent = '0px';
+      });
     }
 
-    // 왼쪽 패널 접기 / 펼치기
     function toggleSidebar() {
       const sidebar = document.getElementById('editor-sidebar');
       const btn = document.getElementById('toggle-sidebar-btn');
@@ -296,7 +362,6 @@
       btn.textContent = sidebar.classList.contains('collapsed') ? '▶ 편집 패널 펼치기' : '◀ 편집 패널 접기';
     }
 
-    // 프로필 이미지 업로드 & 삭제
     function handleAvatarUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -318,163 +383,260 @@
       document.getElementById('avatar-input').value = '';
     }
 
-    // 메인 박스 슬롯 추가
-    function addSlot(type) {
-      if (slots.length >= MAX_SLOTS) {
-        alert('메인 박스의 란은 최대 6개까지만 추가할 수 있습니다.');
+    /* ---------- 프로필 동적 항목 관리 ---------- */
+    function addProfileField() {
+      profileFields.push({
+        id: Date.now() + Math.random(),
+        label: '새 항목',
+        value: '내용을 입력하세요.'
+      });
+      renderProfileFields();
+    }
+
+    function removeProfileField(index) {
+      profileFields.splice(index, 1);
+      renderProfileFields();
+    }
+
+    function renderProfileFields() {
+      const editorWrap = document.getElementById('profile-fields-editor');
+      const previewWrap = document.getElementById('prev-profile-fields');
+      editorWrap.innerHTML = '';
+      previewWrap.innerHTML = '';
+
+      profileFields.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'dynamic-item-card';
+
+        const topRow = document.createElement('div');
+        topRow.className = 'dynamic-item-top';
+
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.value = item.label;
+        labelInput.placeholder = '항목명';
+        labelInput.oninput = (e) => {
+          profileFields[idx].label = e.target.value;
+          document.getElementById(`prev-p-label-${idx}`).textContent = e.target.value;
+        };
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger';
+        delBtn.textContent = '삭제';
+        delBtn.onclick = () => removeProfileField(idx);
+
+        topRow.appendChild(labelInput);
+        topRow.appendChild(delBtn);
+
+        const valTextarea = document.createElement('textarea');
+        valTextarea.value = item.value;
+        valTextarea.placeholder = '내용';
+        valTextarea.oninput = (e) => {
+          profileFields[idx].value = e.target.value;
+          document.getElementById(`prev-p-val-${idx}`).textContent = e.target.value;
+        };
+
+        card.appendChild(topRow);
+        card.appendChild(valTextarea);
+        editorWrap.appendChild(card);
+
+        // 미리보기 렌더링
+        const block = document.createElement('div');
+        const lbl = document.createElement('div');
+        lbl.className = 'dynamic-preview-label';
+        lbl.id = `prev-p-label-${idx}`;
+        lbl.textContent = item.label;
+
+        const val = document.createElement('div');
+        val.className = 'dynamic-preview-value';
+        val.id = `prev-p-val-${idx}`;
+        val.textContent = item.value;
+
+        block.appendChild(lbl);
+        block.appendChild(val);
+        previewWrap.appendChild(block);
+      });
+    }
+
+    /* ---------- 메인 박스 이미지 칸(1~6개) 관리 ---------- */
+    function addImageSlot() {
+      if (imageSlots.length >= MAX_IMAGES) {
+        alert('이미지는 최대 6개까지만 추가할 수 있습니다.');
         return;
       }
-      slots.push({
-        id: Date.now() + Math.random(),
-        type,
-        imgSrc: '',
-        text: type === 'text' ? '내용을 입력하세요.' : ''
-      });
-      renderSlots();
+      imageSlots.push({ id: Date.now() + Math.random(), imgSrc: '' });
+      renderImageSlots();
     }
 
-    // 메인 박스 슬롯 삭제
-    function removeSlot(index) {
-      slots.splice(index, 1);
-      renderSlots();
+    function removeImageSlot(index) {
+      imageSlots.splice(index, 1);
+      renderImageSlots();
     }
 
-    // 슬롯 이미지 업로드
     function handleSlotImageUpload(index, event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
       reader.onload = (e) => {
-        slots[index].imgSrc = e.target.result;
-        renderSlots();
+        imageSlots[index].imgSrc = e.target.result;
+        renderImageSlots();
       };
       reader.readAsDataURL(file);
     }
 
-    // 슬롯 텍스트 수정
-    function handleSlotTextChange(index, value) {
-      slots[index].text = value;
-      const previewEl = document.getElementById(`canvas-slot-text-${index}`);
-      if (previewEl) previewEl.textContent = value;
-    }
+    function renderImageSlots() {
+      const editorWrap = document.getElementById('image-slots-editor');
+      const gallery = document.getElementById('prev-image-gallery');
+      document.getElementById('img-count-label').textContent = imageSlots.length;
 
-    // 왼쪽 편집 UI + 오른쪽 캔버스 슬롯 동시 렌더링
-    function renderSlots() {
-      const editorList = document.getElementById('slot-editor-list');
-      const canvasGrid = document.getElementById('prev-slots-grid');
-      document.getElementById('slot-count-label').textContent = slots.length;
+      editorWrap.innerHTML = '';
+      gallery.innerHTML = '';
+      gallery.className = `image-gallery count-${imageSlots.length}`;
 
-      editorList.innerHTML = '';
-      canvasGrid.innerHTML = '';
-
-      slots.forEach((slot, idx) => {
-        // 1) 왼쪽 편집기 카드 생성
+      imageSlots.forEach((slot, idx) => {
         const card = document.createElement('div');
-        card.className = 'slot-editor-card';
+        card.className = 'dynamic-item-card';
 
-        const header = document.createElement('div');
-        header.className = 'slot-editor-header';
-        header.innerHTML = `<span>칸 #${idx + 1} (${slot.type === 'image' ? '이미지' : '글'})</span>`;
+        const topRow = document.createElement('div');
+        topRow.className = 'dynamic-item-top';
+        topRow.style.justifyContent = 'space-between';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.style.fontSize = '12px';
+        titleSpan.style.fontWeight = '700';
+        titleSpan.textContent = `이미지 #${idx + 1}`;
 
         const delBtn = document.createElement('button');
         delBtn.className = 'btn btn-danger';
         delBtn.textContent = '삭제';
-        delBtn.onclick = () => removeSlot(idx);
-        header.appendChild(delBtn);
-        card.appendChild(header);
+        delBtn.onclick = () => removeImageSlot(idx);
 
-        if (slot.type === 'image') {
-          const btnGroup = document.createElement('div');
-          btnGroup.className = 'btn-group';
+        topRow.appendChild(titleSpan);
+        topRow.appendChild(delBtn);
 
-          const clearBtn = document.createElement('button');
-          clearBtn.className = 'btn';
-          clearBtn.textContent = '비우기';
-          clearBtn.onclick = () => {
-            slots[idx].imgSrc = '';
-            renderSlots();
-          };
+        const btnGroup = document.createElement('div');
+        btnGroup.className = 'btn-group';
 
-          const uploadBtn = document.createElement('button');
-          uploadBtn.className = 'btn btn-outline-primary';
-          uploadBtn.textContent = slot.imgSrc ? '사진 변경' : '사진 선택';
-
-          const fileInput = document.createElement('input');
-          fileInput.type = 'file';
-          fileInput.accept = 'image/*';
-          fileInput.hidden = true;
-          fileInput.onchange = (e) => handleSlotImageUpload(idx, e);
-
-          uploadBtn.onclick = () => fileInput.click();
-
-          btnGroup.appendChild(clearBtn);
-          btnGroup.appendChild(uploadBtn);
-          btnGroup.appendChild(fileInput);
-          card.appendChild(btnGroup);
-        } else {
-          const textarea = document.createElement('textarea');
-          textarea.value = slot.text;
-          textarea.placeholder = '칸에 들어갈 글 내용을 입력하세요';
-          textarea.oninput = (e) => handleSlotTextChange(idx, e.target.value);
-          card.appendChild(textarea);
-        }
-
-        editorList.appendChild(card);
-
-        // 2) 오른쪽 캔버스 칸 생성
-        const canvasSlot = document.createElement('div');
-        canvasSlot.className = `canvas-slot ${slot.type === 'image' ? 'is-image' : 'is-text'}`;
-
-        if (slot.type === 'image') {
-          if (slot.imgSrc) {
-            const img = document.createElement('img');
-            img.src = slot.imgSrc;
-            canvasSlot.appendChild(img);
-          } else {
-            const span = document.createElement('span');
-            span.className = 'slot-empty-label';
-            span.textContent = '이미지';
-            canvasSlot.appendChild(span);
-          }
-        } else {
-          const textDiv = document.createElement('div');
-          textDiv.className = 'canvas-slot-text';
-          textDiv.id = `canvas-slot-text-${idx}`;
-          textDiv.textContent = slot.text;
-          canvasSlot.appendChild(textDiv);
-        }
-
-        canvasGrid.appendChild(canvasSlot);
-      });
-    }
-
-    // 태그 토글 렌더링
-    function renderTags() {
-      const toggleWrap = document.getElementById('tag-toggle-wrap');
-      const previewTags = document.getElementById('prev-tags');
-      toggleWrap.innerHTML = '';
-      previewTags.innerHTML = '';
-
-      tags.forEach((tag, idx) => {
-        // 편집기 버튼
-        const btn = document.createElement('button');
-        btn.className = `tag-toggle-btn ${tag.active ? 'active' : ''}`;
-        btn.textContent = tag.label;
-        btn.onclick = () => {
-          tags[idx].active = !tags[idx].active;
-          renderTags();
+        const clearBtn = document.createElement('button');
+        clearBtn.className = 'btn';
+        clearBtn.textContent = '비우기';
+        clearBtn.onclick = () => {
+          imageSlots[idx].imgSrc = '';
+          renderImageSlots();
         };
-        toggleWrap.appendChild(btn);
 
-        // 캔버스 태그 표시
-        const span = document.createElement('span');
-        span.className = `preview-tag ${tag.active ? 'active' : ''}`;
-        span.textContent = tag.label;
-        previewTags.appendChild(span);
+        const uploadBtn = document.createElement('button');
+        uploadBtn.className = 'btn btn-outline-primary';
+        uploadBtn.textContent = slot.imgSrc ? '사진 변경' : '사진 선택';
+
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.hidden = true;
+        fileInput.onchange = (e) => handleSlotImageUpload(idx, e);
+
+        uploadBtn.onclick = () => fileInput.click();
+
+        btnGroup.appendChild(clearBtn);
+        btnGroup.appendChild(uploadBtn);
+        btnGroup.appendChild(fileInput);
+
+        card.appendChild(topRow);
+        card.appendChild(btnGroup);
+        editorWrap.appendChild(card);
+
+        // 캔버스 칸 렌더링
+        const cell = document.createElement('div');
+        cell.className = 'gallery-cell';
+        if (slot.imgSrc) {
+          const img = document.createElement('img');
+          img.src = slot.imgSrc;
+          cell.appendChild(img);
+        } else {
+          const empty = document.createElement('span');
+          empty.className = 'gallery-empty-text';
+          empty.textContent = `이미지 ${idx + 1}`;
+          cell.appendChild(empty);
+        }
+        gallery.appendChild(cell);
       });
     }
 
-    // PNG 다운로드
+    /* ---------- 서브 박스 동적 항목 관리 ---------- */
+    function addSubField() {
+      subFields.push({
+        id: Date.now() + Math.random(),
+        label: '새 항목',
+        value: '내용을 입력하세요.'
+      });
+      renderSubFields();
+    }
+
+    function removeSubField(index) {
+      subFields.splice(index, 1);
+      renderSubFields();
+    }
+
+    function renderSubFields() {
+      const editorWrap = document.getElementById('sub-fields-editor');
+      const previewWrap = document.getElementById('prev-sub-fields');
+      editorWrap.innerHTML = '';
+      previewWrap.innerHTML = '';
+
+      subFields.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'dynamic-item-card';
+
+        const topRow = document.createElement('div');
+        topRow.className = 'dynamic-item-top';
+
+        const labelInput = document.createElement('input');
+        labelInput.type = 'text';
+        labelInput.value = item.label;
+        labelInput.placeholder = '항목 제목';
+        labelInput.oninput = (e) => {
+          subFields[idx].label = e.target.value;
+          document.getElementById(`prev-s-label-${idx}`).textContent = e.target.value;
+        };
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger';
+        delBtn.textContent = '삭제';
+        delBtn.onclick = () => removeSubField(idx);
+
+        topRow.appendChild(labelInput);
+        topRow.appendChild(delBtn);
+
+        const valTextarea = document.createElement('textarea');
+        valTextarea.value = item.value;
+        valTextarea.placeholder = '내용';
+        valTextarea.oninput = (e) => {
+          subFields[idx].value = e.target.value;
+          document.getElementById(`prev-s-val-${idx}`).textContent = e.target.value;
+        };
+
+        card.appendChild(topRow);
+        card.appendChild(valTextarea);
+        editorWrap.appendChild(card);
+
+        // 미리보기 렌더링
+        const block = document.createElement('div');
+        const lbl = document.createElement('div');
+        lbl.className = 'dynamic-preview-label';
+        lbl.id = `prev-s-label-${idx}`;
+        lbl.textContent = item.label;
+
+        const val = document.createElement('div');
+        val.className = 'dynamic-preview-value';
+        val.id = `prev-s-val-${idx}`;
+        val.textContent = item.value;
+
+        block.appendChild(lbl);
+        block.appendChild(val);
+        previewWrap.appendChild(block);
+      });
+    }
+
     function downloadImage() {
       const target = document.getElementById('maintweet-canvas');
       html2canvas(target, {
