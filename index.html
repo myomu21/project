@@ -14,7 +14,7 @@
     <aside class="editor-sidebar" id="editor-sidebar">
       <div class="sidebar-header">
         <h1>메인 트윗 편집기</h1>
-        <p>항목 추가/삭제, 박스별 색상·배경·블러를 자유롭게 설정하세요.</p>
+        <p>오류 및 추가 원하는 부분은 편히 디엠 주세요!</p>
       </div>
 
       <div class="sidebar-scroll">
@@ -44,7 +44,7 @@
               <input type="file" id="bg-input-canvas" accept="image/*" hidden onchange="handleBgUpload('canvas', event)" />
             </div>
             <div class="blur-row">
-              <span>블러</span>
+              <span>배경 블러</span>
               <input type="range" id="blur-canvas" min="0" max="20" value="0" oninput="setBlur('--canvas-blur', 'blur-val-canvas', this.value)" />
               <span id="blur-val-canvas">0px</span>
             </div>
@@ -56,26 +56,39 @@
           <div class="group-title">2. 프로필 박스</div>
 
           <div class="sub-card-box">
-            <div class="sub-card-title">박스 스타일 (색상 / 배경 / 글자색)</div>
+            <div class="sub-card-title">박스 스타일 (색상 / 투명도 / 뒷배경 흐림)</div>
             <div class="color-mini-row">
               <div class="color-mini-item">
                 <span>배경색</span>
-                <input type="color" id="c-profile-bg" value="#ffffff" oninput="setCssVar('--profile-bg', this.value)" />
+                <input type="color" id="c-profile-bg" value="#ffffff" oninput="updateBoxBg('profile')" />
               </div>
               <div class="color-mini-item">
                 <span>글자색</span>
                 <input type="color" id="c-profile-text" value="#111111" oninput="setCssVar('--profile-text', this.value)" />
               </div>
             </div>
+
+            <div class="blur-row">
+              <span>배경 불투명도</span>
+              <input type="range" id="opacity-profile" min="0" max="100" value="100" oninput="updateBoxBg('profile')" />
+              <span id="opacity-val-profile">100%</span>
+            </div>
+
+            <div class="blur-row">
+              <span>뒷배경 흐림</span>
+              <input type="range" id="backdrop-profile" min="0" max="20" value="0" oninput="setBlur('--profile-backdrop-blur', 'backdrop-val-profile', this.value)" />
+              <span id="backdrop-val-profile">0px</span>
+            </div>
+
             <div class="btn-group">
               <button class="btn" onclick="setQuickTextColor('--profile-text', 'c-profile-text', '#111111')">어두운 글씨</button>
               <button class="btn" onclick="setQuickTextColor('--profile-text', 'c-profile-text', '#ffffff')">밝은 글씨</button>
-              <button class="btn" onclick="clearBgImage('profile')">배경 사진 삭제</button>
-              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-profile').click()">배경 사진</button>
+              <button class="btn" onclick="clearBgImage('profile')">내부 배경 삭제</button>
+              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-profile').click()">내부 배경 사진</button>
               <input type="file" id="bg-input-profile" accept="image/*" hidden onchange="handleBgUpload('profile', event)" />
             </div>
             <div class="blur-row">
-              <span>배경 블러</span>
+              <span>내부 사진 블러</span>
               <input type="range" id="blur-profile" min="0" max="20" value="0" oninput="setBlur('--profile-blur', 'blur-val-profile', this.value)" />
               <span id="blur-val-profile">0px</span>
             </div>
@@ -103,7 +116,7 @@
 
           <div class="field">
             <div class="group-title">
-              <label>프로필 항목 (직접 추가·수정·삭제)</label>
+              <label>프로필 항목</label>
               <button class="btn btn-outline-primary" onclick="addProfileField()">+ 항목 추가</button>
             </div>
             <div id="profile-fields-editor" class="slot-editor-list"></div>
@@ -115,26 +128,39 @@
           <div class="group-title">3. 메인 박스</div>
 
           <div class="sub-card-box">
-            <div class="sub-card-title">박스 스타일 (색상 / 배경 / 글자색)</div>
+            <div class="sub-card-title">박스 스타일 (색상 / 투명도 / 뒷배경 흐림)</div>
             <div class="color-mini-row">
               <div class="color-mini-item">
                 <span>배경색</span>
-                <input type="color" id="c-main-bg" value="#ffffff" oninput="setCssVar('--main-bg', this.value)" />
+                <input type="color" id="c-main-bg" value="#ffffff" oninput="updateBoxBg('main')" />
               </div>
               <div class="color-mini-item">
                 <span>글자색</span>
                 <input type="color" id="c-main-text" value="#111111" oninput="setCssVar('--main-text', this.value)" />
               </div>
             </div>
+
+            <div class="blur-row">
+              <span>배경 불투명도</span>
+              <input type="range" id="opacity-main" min="0" max="100" value="100" oninput="updateBoxBg('main')" />
+              <span id="opacity-val-main">100%</span>
+            </div>
+
+            <div class="blur-row">
+              <span>뒷배경 흐림</span>
+              <input type="range" id="backdrop-main" min="0" max="20" value="0" oninput="setBlur('--main-backdrop-blur', 'backdrop-val-main', this.value)" />
+              <span id="backdrop-val-main">0px</span>
+            </div>
+
             <div class="btn-group">
               <button class="btn" onclick="setQuickTextColor('--main-text', 'c-main-text', '#111111')">어두운 글씨</button>
               <button class="btn" onclick="setQuickTextColor('--main-text', 'c-main-text', '#ffffff')">밝은 글씨</button>
-              <button class="btn" onclick="clearBgImage('main')">배경 사진 삭제</button>
-              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-main').click()">배경 사진</button>
+              <button class="btn" onclick="clearBgImage('main')">내부 배경 삭제</button>
+              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-main').click()">내부 배경 사진</button>
               <input type="file" id="bg-input-main" accept="image/*" hidden onchange="handleBgUpload('main', event)" />
             </div>
             <div class="blur-row">
-              <span>배경 블러</span>
+              <span>내부 사진 블러</span>
               <input type="range" id="blur-main" min="0" max="20" value="0" oninput="setBlur('--main-blur', 'blur-val-main', this.value)" />
               <span id="blur-val-main">0px</span>
             </div>
@@ -159,26 +185,39 @@
           <div class="group-title">4. 서브 박스</div>
 
           <div class="sub-card-box">
-            <div class="sub-card-title">박스 스타일 (색상 / 배경 / 글자색)</div>
+            <div class="sub-card-title">박스 스타일 (색상 / 투명도 / 뒷배경 흐림)</div>
             <div class="color-mini-row">
               <div class="color-mini-item">
                 <span>배경색</span>
-                <input type="color" id="c-sub-bg" value="#ffffff" oninput="setCssVar('--sub-bg', this.value)" />
+                <input type="color" id="c-sub-bg" value="#ffffff" oninput="updateBoxBg('sub')" />
               </div>
               <div class="color-mini-item">
                 <span>글자색</span>
                 <input type="color" id="c-sub-text" value="#111111" oninput="setCssVar('--sub-text', this.value)" />
               </div>
             </div>
+
+            <div class="blur-row">
+              <span>배경 불투명도</span>
+              <input type="range" id="opacity-sub" min="0" max="100" value="100" oninput="updateBoxBg('sub')" />
+              <span id="opacity-val-sub">100%</span>
+            </div>
+
+            <div class="blur-row">
+              <span>뒷배경 흐림</span>
+              <input type="range" id="backdrop-sub" min="0" max="20" value="0" oninput="setBlur('--sub-backdrop-blur', 'backdrop-val-sub', this.value)" />
+              <span id="backdrop-val-sub">0px</span>
+            </div>
+
             <div class="btn-group">
               <button class="btn" onclick="setQuickTextColor('--sub-text', 'c-sub-text', '#111111')">어두운 글씨</button>
               <button class="btn" onclick="setQuickTextColor('--sub-text', 'c-sub-text', '#ffffff')">밝은 글씨</button>
-              <button class="btn" onclick="clearBgImage('sub')">배경 사진 삭제</button>
-              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-sub').click()">배경 사진</button>
+              <button class="btn" onclick="clearBgImage('sub')">내부 배경 삭제</button>
+              <button class="btn btn-outline-primary" onclick="document.getElementById('bg-input-sub').click()">내부 배경 사진</button>
               <input type="file" id="bg-input-sub" accept="image/*" hidden onchange="handleBgUpload('sub', event)" />
             </div>
             <div class="blur-row">
-              <span>배경 블러</span>
+              <span>내부 사진 블러</span>
               <input type="range" id="blur-sub" min="0" max="20" value="0" oninput="setBlur('--sub-blur', 'blur-val-sub', this.value)" />
               <span id="blur-val-sub">0px</span>
             </div>
@@ -197,6 +236,34 @@
             <div id="sub-fields-editor" class="slot-editor-list"></div>
           </div>
         </div>
+
+        <!-- 5. 스티커 설정 -->
+        <div class="control-group">
+          <div class="group-title">
+            <span>5. 스티커 (<span id="sticker-count-label">0</span>)</span>
+            <button class="btn btn-outline-primary" onclick="document.getElementById('sticker-input').click()">+ 스티커 추가</button>
+            <input type="file" id="sticker-input" accept="image/*" hidden onchange="handleStickerUpload(event)" />
+          </div>
+          <p style="font-size: 11.5px; color: #64748b; line-height: 1.4;">
+            캔버스 어디든 자유롭게 드래그해 붙일 수 있습니다. 스티커를 클릭하면 모서리 핸들로 크기 조절, 위 핸들로 회전이 가능합니다.
+          </p>
+
+          <div class="sub-card-box" id="selected-sticker-controls" style="display: none;">
+            <div class="sub-card-title">선택한 스티커 조절</div>
+            <div class="blur-row">
+              <span>회전</span>
+              <input type="range" id="sticker-rotate-slider" min="-180" max="180" value="0" oninput="setSelectedStickerRotation(Number(this.value))" />
+              <span id="sticker-rotate-val">0°</span>
+            </div>
+            <div class="btn-group">
+              <button class="btn" onclick="openBgRemoverForSelected()">배경 투명화</button>
+              <button class="btn" onclick="bringSelectedStickerFront()">맨 앞으로</button>
+              <button class="btn btn-danger" onclick="removeSelectedSticker()">삭제</button>
+            </div>
+          </div>
+
+          <div id="sticker-list-editor" class="slot-editor-list"></div>
+        </div>
       </div>
 
       <div class="sidebar-footer">
@@ -205,7 +272,7 @@
     </aside>
 
     <!-- ==================== 오른쪽: 미리보기 영역 ==================== -->
-    <main class="preview-workspace">
+    <main class="preview-workspace" onclick="handleWorkspaceClick(event)">
       <div class="preview-topbar">
         <button class="toggle-sidebar-btn" id="toggle-sidebar-btn" onclick="toggleSidebar()">◀ 편집 패널 접기</button>
       </div>
@@ -245,15 +312,51 @@
               <div class="dynamic-preview-list" id="prev-sub-fields"></div>
             </div>
           </div>
+
+          <!-- 4. 자유 배치 스티커 레이어 -->
+          <div class="sticker-layer" id="sticker-layer"></div>
         </div>
       </div>
     </main>
   </div>
 
+  <!-- ==================== 스티커 배경 투명화 모달 ==================== -->
+  <div class="bg-remover-modal" id="bg-remover-modal">
+    <div class="bg-remover-card">
+      <div class="bg-remover-header">
+        <span>스티커 배경 투명화</span>
+        <button class="btn" onclick="closeBgRemover()">닫기</button>
+      </div>
+      <p style="font-size: 12px; color: #64748b;">
+        투명하게 지울 배경 색상을 선택하거나, 아래 이미지에서 지우고 싶은 배경 부분을 직접 클릭하세요.
+      </p>
+      <div class="bg-remover-canvas-wrap">
+        <canvas id="remover-canvas"></canvas>
+      </div>
+      <div class="bg-remover-controls">
+        <div class="bg-remover-color-row">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span>제거할 배경색</span>
+            <input type="color" id="remove-target-color" value="#ffffff" />
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; flex: 1; max-width: 240px;">
+            <span>허용 오차</span>
+            <input type="range" id="remove-tolerance" min="0" max="120" value="35" style="flex: 1;" />
+            <span id="remove-tolerance-val">35</span>
+          </div>
+        </div>
+        <div class="btn-group" style="justify-content: flex-end; margin-top: 4px;">
+          <button class="btn" onclick="restoreOriginalSticker()">원본 복구</button>
+          <button class="btn btn-outline-primary" onclick="applyTransparencyToCanvas()">배경 투명화 실행</button>
+          <button class="btn btn-outline-primary" style="background: #1d9bf0; color: #fff;" onclick="confirmTransparentSticker()">스티커에 적용</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const MAX_IMAGES = 6;
 
-    // 프로필 동적 항목 상태 (초기값은 예시일 뿐 자유롭게 수정·삭제·추가 가능)
     let profileFields = [
       { id: 1, label: '나이', value: '성인 / 비공개' },
       { id: 2, label: '성별', value: '여성 / 남성 / 기타' },
@@ -261,7 +364,6 @@
       { id: 4, label: '기타', value: '자유롭게 소개를 적어주세요.' }
     ];
 
-    // 메인 박스 이미지 전용 슬롯 (1~6개)
     let imageSlots = [
       { id: 1, imgSrc: '' },
       { id: 2, imgSrc: '' },
@@ -271,17 +373,23 @@
       { id: 6, imgSrc: '' }
     ];
 
-    // 서브 박스 동적 항목 상태 (자유롭게 수정·삭제·추가 가능)
     let subFields = [
       { id: 1, label: 'LIKE', value: '• 본진 장르 및 최애\n• 좋아하는 소재나 분위기' },
       { id: 2, label: 'AVOID', value: '• 피하고 싶은 요소가 있다면 적어주세요.' },
       { id: 3, label: 'FUB FREE / 이별', value: '• 팔로우 자유 / 이별은 블언블 부탁드립니다.' }
     ];
 
+    let stickers = [];
+    let selectedStickerId = null;
+    let removingStickerId = null;
+    let originalStickerDataUrl = '';
+
     window.onload = () => {
       renderProfileFields();
       renderImageSlots();
       renderSubFields();
+      renderStickers();
+      setupRemoverCanvasEvents();
     };
 
     function syncText(targetId, value) {
@@ -290,6 +398,26 @@
 
     function setCssVar(varName, value) {
       document.documentElement.style.setProperty(varName, value);
+    }
+
+    function hexToRgb(hex) {
+      const clean = hex.replace('#', '');
+      return {
+        r: parseInt(clean.substring(0, 2), 16),
+        g: parseInt(clean.substring(2, 4), 16),
+        b: parseInt(clean.substring(4, 6), 16)
+      };
+    }
+
+    // 박스 배경색 + 불투명도(0~100%) 동시 반영
+    function updateBoxBg(boxKey) {
+      const hex = document.getElementById(`c-${boxKey}-bg`).value;
+      const opacityPct = Number(document.getElementById(`opacity-${boxKey}`).value);
+      document.getElementById(`opacity-val-${boxKey}`).textContent = `${opacityPct}%`;
+
+      const { r, g, b } = hexToRgb(hex);
+      const alpha = (opacityPct / 100).toFixed(2);
+      setCssVar(`--${boxKey}-bg-rgba`, `rgba(${r}, ${g}, ${b}, ${alpha})`);
     }
 
     function setQuickTextColor(varName, inputId, hex) {
@@ -326,27 +454,33 @@
       const defaults = {
         '--canvas-bg': '#ffffff',
         '--canvas-blur': '0px',
-        '--profile-bg': '#ffffff',
+        '--profile-bg-rgba': 'rgba(255, 255, 255, 1)',
         '--profile-text': '#111111',
         '--profile-blur': '0px',
-        '--main-bg': '#ffffff',
+        '--profile-backdrop-blur': '0px',
+        '--main-bg-rgba': 'rgba(255, 255, 255, 1)',
         '--main-text': '#111111',
         '--main-blur': '0px',
-        '--sub-bg': '#ffffff',
+        '--main-backdrop-blur': '0px',
+        '--sub-bg-rgba': 'rgba(255, 255, 255, 1)',
         '--sub-text': '#111111',
         '--sub-blur': '0px',
+        '--sub-backdrop-blur': '0px',
         '--accent-color': '#222222'
       };
       Object.entries(defaults).forEach(([k, v]) => setCssVar(k, v));
 
       document.getElementById('c-canvas-bg').value = '#ffffff';
       document.getElementById('c-accent').value = '#222222';
-      document.getElementById('c-profile-bg').value = '#ffffff';
-      document.getElementById('c-profile-text').value = '#111111';
-      document.getElementById('c-main-bg').value = '#ffffff';
-      document.getElementById('c-main-text').value = '#111111';
-      document.getElementById('c-sub-bg').value = '#ffffff';
-      document.getElementById('c-sub-text').value = '#111111';
+
+      ['profile', 'main', 'sub'].forEach((b) => {
+        document.getElementById(`c-${b}-bg`).value = '#ffffff';
+        document.getElementById(`c-${b}-text`).value = '#111111';
+        document.getElementById(`opacity-${b}`).value = 100;
+        document.getElementById(`opacity-val-${b}`).textContent = '100%';
+        document.getElementById(`backdrop-${b}`).value = 0;
+        document.getElementById(`backdrop-val-${b}`).textContent = '0px';
+      });
 
       ['canvas', 'profile', 'main', 'sub'].forEach((t) => {
         clearBgImage(t);
@@ -440,7 +574,6 @@
         card.appendChild(valTextarea);
         editorWrap.appendChild(card);
 
-        // 미리보기 렌더링
         const block = document.createElement('div');
         const lbl = document.createElement('div');
         lbl.className = 'dynamic-preview-label';
@@ -545,7 +678,6 @@
         card.appendChild(btnGroup);
         editorWrap.appendChild(card);
 
-        // 캔버스 칸 렌더링
         const cell = document.createElement('div');
         cell.className = 'gallery-cell';
         if (slot.imgSrc) {
@@ -619,7 +751,6 @@
         card.appendChild(valTextarea);
         editorWrap.appendChild(card);
 
-        // 미리보기 렌더링
         const block = document.createElement('div');
         const lbl = document.createElement('div');
         lbl.className = 'dynamic-preview-label';
@@ -637,16 +768,383 @@
       });
     }
 
+    /* ---------- 스티커 추가·이동·크기·회전·배경투명화 ---------- */
+    function handleStickerUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const newId = Date.now() + Math.random();
+        const newSticker = {
+          id: newId,
+          src: e.target.result,
+          originalSrc: e.target.result,
+          x: 420 + (stickers.length * 24) % 240,
+          y: 160 + (stickers.length * 24) % 180,
+          width: 140,
+          height: 140,
+          rotation: 0
+        };
+        stickers.push(newSticker);
+        selectedStickerId = newId;
+        renderStickers();
+        openBgRemover(newId);
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function selectSticker(id, event) {
+      if (event) event.stopPropagation();
+      selectedStickerId = id;
+      updateStickerSelectionUI();
+    }
+
+    function handleWorkspaceClick(event) {
+      if (!event.target.closest('.sticker-item') && !event.target.closest('#selected-sticker-controls')) {
+        selectedStickerId = null;
+        updateStickerSelectionUI();
+      }
+    }
+
+    function updateStickerSelectionUI() {
+      document.querySelectorAll('.sticker-item').forEach((el) => {
+        el.classList.toggle('selected', String(el.dataset.id) === String(selectedStickerId));
+      });
+
+      const panel = document.getElementById('selected-sticker-controls');
+      const current = stickers.find((s) => s.id === selectedStickerId);
+      if (!current) {
+        panel.style.display = 'none';
+        return;
+      }
+      panel.style.display = 'flex';
+      document.getElementById('sticker-rotate-slider').value = current.rotation;
+      document.getElementById('sticker-rotate-val').textContent = `${Math.round(current.rotation)}°`;
+    }
+
+    function setSelectedStickerRotation(deg) {
+      const current = stickers.find((s) => s.id === selectedStickerId);
+      if (!current) return;
+      current.rotation = deg;
+      document.getElementById('sticker-rotate-val').textContent = `${Math.round(deg)}°`;
+      applyStickerTransform(current.id);
+    }
+
+    function applyStickerTransform(id) {
+      const s = stickers.find((item) => item.id === id);
+      const el = document.querySelector(`.sticker-item[data-id="${id}"]`);
+      if (!s || !el) return;
+      el.style.left = `${s.x}px`;
+      el.style.top = `${s.y}px`;
+      el.style.width = `${s.width}px`;
+      el.style.height = `${s.height}px`;
+      el.style.transform = `rotate(${s.rotation}deg)`;
+    }
+
+    function bringSelectedStickerFront() {
+      if (!selectedStickerId) return;
+      const idx = stickers.findIndex((s) => s.id === selectedStickerId);
+      if (idx === -1) return;
+      const [item] = stickers.splice(idx, 1);
+      stickers.push(item);
+      renderStickers();
+    }
+
+    function removeSelectedSticker() {
+      if (!selectedStickerId) return;
+      stickers = stickers.filter((s) => s.id !== selectedStickerId);
+      selectedStickerId = null;
+      renderStickers();
+    }
+
+    function removeStickerById(id) {
+      stickers = stickers.filter((s) => s.id !== id);
+      if (selectedStickerId === id) selectedStickerId = null;
+      renderStickers();
+    }
+
+    function renderStickers() {
+      const layer = document.getElementById('sticker-layer');
+      const listEditor = document.getElementById('sticker-list-editor');
+      document.getElementById('sticker-count-label').textContent = stickers.length;
+
+      layer.innerHTML = '';
+      listEditor.innerHTML = '';
+
+      stickers.forEach((s, idx) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = `sticker-item ${s.id === selectedStickerId ? 'selected' : ''}`;
+        itemEl.dataset.id = s.id;
+        itemEl.style.left = `${s.x}px`;
+        itemEl.style.top = `${s.y}px`;
+        itemEl.style.width = `${s.width}px`;
+        itemEl.style.height = `${s.height}px`;
+        itemEl.style.transform = `rotate(${s.rotation}deg)`;
+
+        const imgEl = document.createElement('img');
+        imgEl.src = s.src;
+        imgEl.alt = `스티커 ${idx + 1}`;
+        itemEl.appendChild(imgEl);
+
+        const delHandle = document.createElement('div');
+        delHandle.className = 'sticker-handle sticker-delete-handle';
+        delHandle.textContent = '×';
+        delHandle.title = '스티커 삭제';
+        delHandle.onmousedown = (e) => {
+          e.stopPropagation();
+          removeStickerById(s.id);
+        };
+        itemEl.appendChild(delHandle);
+
+        const rotHandle = document.createElement('div');
+        rotHandle.className = 'sticker-handle sticker-rotate-handle';
+        rotHandle.textContent = '↻';
+        rotHandle.title = '드래그하여 회전';
+        rotHandle.onmousedown = (e) => {
+          e.stopPropagation();
+          selectSticker(s.id);
+          startRotateSticker(e, s);
+        };
+        itemEl.appendChild(rotHandle);
+
+        const resHandle = document.createElement('div');
+        resHandle.className = 'sticker-handle sticker-resize-handle';
+        resHandle.textContent = '↘';
+        resHandle.title = '드래그하여 크기 조절';
+        resHandle.onmousedown = (e) => {
+          e.stopPropagation();
+          selectSticker(s.id);
+          startResizeSticker(e, s);
+        };
+        itemEl.appendChild(resHandle);
+
+        itemEl.onmousedown = (e) => {
+          e.stopPropagation();
+          selectSticker(s.id);
+          startMoveSticker(e, s);
+        };
+
+        layer.appendChild(itemEl);
+
+        const listCard = document.createElement('div');
+        listCard.className = 'sticker-list-item';
+
+        const thumb = document.createElement('img');
+        thumb.className = 'sticker-thumb';
+        thumb.src = s.src;
+
+        const label = document.createElement('span');
+        label.style.flex = '1';
+        label.style.fontWeight = '600';
+        label.textContent = `스티커 #${idx + 1}`;
+
+        const transBtn = document.createElement('button');
+        transBtn.className = 'btn';
+        transBtn.textContent = '투명화';
+        transBtn.onclick = () => {
+          selectSticker(s.id);
+          openBgRemover(s.id);
+        };
+
+        const rmBtn = document.createElement('button');
+        rmBtn.className = 'btn btn-danger';
+        rmBtn.textContent = '삭제';
+        rmBtn.onclick = () => removeStickerById(s.id);
+
+        listCard.appendChild(thumb);
+        listCard.appendChild(label);
+        listCard.appendChild(transBtn);
+        listCard.appendChild(rmBtn);
+        listEditor.appendChild(listCard);
+      });
+
+      updateStickerSelectionUI();
+    }
+
+    function startMoveSticker(e, sticker) {
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const origX = sticker.x;
+      const origY = sticker.y;
+
+      function onMouseMove(moveEvt) {
+        sticker.x = origX + (moveEvt.clientX - startX);
+        sticker.y = origY + (moveEvt.clientY - startY);
+        applyStickerTransform(sticker.id);
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function startResizeSticker(e, sticker) {
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const origW = sticker.width;
+      const origH = sticker.height;
+      const ratio = origW / origH;
+
+      function onMouseMove(moveEvt) {
+        const delta = Math.max(moveEvt.clientX - startX, moveEvt.clientY - startY);
+        const nextW = Math.max(40, origW + delta);
+        sticker.width = nextW;
+        sticker.height = nextW / ratio;
+        applyStickerTransform(sticker.id);
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function startRotateSticker(e, sticker) {
+      const el = document.querySelector(`.sticker-item[data-id="${sticker.id}"]`);
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      function onMouseMove(moveEvt) {
+        const rad = Math.atan2(moveEvt.clientY - centerY, moveEvt.clientX - centerX);
+        const deg = (rad * 180) / Math.PI + 90;
+        sticker.rotation = Math.round(deg);
+        document.getElementById('sticker-rotate-slider').value = sticker.rotation;
+        document.getElementById('sticker-rotate-val').textContent = `${sticker.rotation}°`;
+        applyStickerTransform(sticker.id);
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    /* ---------- 스티커 배경 투명화 기능 ---------- */
+    function openBgRemover(id) {
+      const sticker = stickers.find((s) => s.id === id);
+      if (!sticker) return;
+      removingStickerId = id;
+      originalStickerDataUrl = sticker.originalSrc || sticker.src;
+
+      const modal = document.getElementById('bg-remover-modal');
+      const canvas = document.getElementById('remover-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      img.onload = () => {
+        const maxSide = 360;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = sticker.src;
+
+      document.getElementById('remove-tolerance').oninput = (e) => {
+        document.getElementById('remove-tolerance-val').textContent = e.target.value;
+      };
+
+      modal.classList.add('open');
+    }
+
+    function openBgRemoverForSelected() {
+      if (selectedStickerId) openBgRemover(selectedStickerId);
+    }
+
+    function closeBgRemover() {
+      document.getElementById('bg-remover-modal').classList.remove('open');
+      removingStickerId = null;
+    }
+
+    function setupRemoverCanvasEvents() {
+      const canvas = document.getElementById('remover-canvas');
+      canvas.onclick = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const px = Math.floor(((e.clientX - rect.left) / rect.width) * canvas.width);
+        const py = Math.floor(((e.clientY - rect.top) / rect.height) * canvas.height);
+        const ctx = canvas.getContext('2d');
+        const pixel = ctx.getImageData(px, py, 1, 1).data;
+        const hex = `#${[pixel[0], pixel[1], pixel[2]].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+        document.getElementById('remove-target-color').value = hex;
+        applyTransparencyToCanvas();
+      };
+    }
+
+    function applyTransparencyToCanvas() {
+      const canvas = document.getElementById('remover-canvas');
+      const ctx = canvas.getContext('2d');
+      const targetRgb = hexToRgb(document.getElementById('remove-target-color').value);
+      const tolerance = Number(document.getElementById('remove-tolerance').value);
+
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imgData.data;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const dr = data[i] - targetRgb.r;
+        const dg = data[i + 1] - targetRgb.g;
+        const db = data[i + 2] - targetRgb.b;
+        const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+        if (dist <= tolerance) {
+          data[i + 3] = 0;
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    function restoreOriginalSticker() {
+      if (!originalStickerDataUrl) return;
+      const canvas = document.getElementById('remover-canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = originalStickerDataUrl;
+    }
+
+    function confirmTransparentSticker() {
+      const sticker = stickers.find((s) => s.id === removingStickerId);
+      const canvas = document.getElementById('remover-canvas');
+      if (sticker) {
+        sticker.src = canvas.toDataURL('image/png');
+        renderStickers();
+      }
+      closeBgRemover();
+    }
+
+    /* ---------- PNG 다운로드 ---------- */
     function downloadImage() {
+      const prevSelected = selectedStickerId;
+      selectedStickerId = null;
+      updateStickerSelectionUI();
+
       const target = document.getElementById('maintweet-canvas');
       html2canvas(target, {
         scale: 2,
         useCORS: true
-      }).then(canvas => {
+      }).then((canvas) => {
         const link = document.createElement('a');
         link.download = 'maintweet.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
+
+        selectedStickerId = prevSelected;
+        updateStickerSelectionUI();
       });
     }
   </script>
