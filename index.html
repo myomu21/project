@@ -14,7 +14,7 @@
     <aside class="editor-sidebar" id="editor-sidebar">
       <div class="sidebar-header">
         <h1>메인 트윗 편집기</h1>
-        <p>오류 및 추가 원하는 부분은 편히 디엠 주세요!</p>
+        <p>박스별 투명도·유리 효과, 이미지 구도 조절 및 스티커를 설정하세요.</p>
       </div>
 
       <div class="sidebar-scroll">
@@ -116,14 +116,14 @@
 
           <div class="field">
             <div class="group-title">
-              <label>프로필 항목</label>
+              <label>프로필 항목 (직접 추가·수정·삭제)</label>
               <button class="btn btn-outline-primary" onclick="addProfileField()">+ 항목 추가</button>
             </div>
             <div id="profile-fields-editor" class="slot-editor-list"></div>
           </div>
         </div>
 
-        <!-- 3. 메인 박스 설정 (이미지 1~6개 전용) -->
+        <!-- 3. 메인 박스 설정 (고정 틀 + 확대/축소/이동 + 이름 칸 선택형) -->
         <div class="control-group">
           <div class="group-title">3. 메인 박스</div>
 
@@ -171,6 +171,16 @@
               <span>이미지 칸 (<span id="img-count-label">6</span> / 6)</span>
               <button class="btn btn-outline-primary" onclick="addImageSlot()">+ 이미지 추가</button>
             </div>
+
+            <label class="checkbox-label" style="margin: 2px 0 4px;">
+              <input type="checkbox" id="toggle-captions" onchange="toggleImageCaptions(this.checked)" />
+              <span>이미지 아래에 이름(캡션) 칸 표시</span>
+            </label>
+
+            <p style="font-size: 11.5px; color: #64748b; line-height: 1.4;">
+              사진을 넣은 뒤 슬라이더 또는 미리보기 칸 직접 드래그로 확대·축소 및 위치 이동이 가능합니다.
+            </p>
+
             <div id="image-slots-editor" class="slot-editor-list"></div>
           </div>
 
@@ -364,13 +374,15 @@
       { id: 4, label: '기타', value: '자유롭게 소개를 적어주세요.' }
     ];
 
+    // 메인 박스 이미지 슬롯 (확대/축소 scale, 이동 x/y, 이미지 이름 caption 포함)
+    let showImageCaptions = false;
     let imageSlots = [
-      { id: 1, imgSrc: '' },
-      { id: 2, imgSrc: '' },
-      { id: 3, imgSrc: '' },
-      { id: 4, imgSrc: '' },
-      { id: 5, imgSrc: '' },
-      { id: 6, imgSrc: '' }
+      { id: 1, imgSrc: '', scale: 1, x: 0, y: 0, caption: '이미지 1' },
+      { id: 2, imgSrc: '', scale: 1, x: 0, y: 0, caption: '이미지 2' },
+      { id: 3, imgSrc: '', scale: 1, x: 0, y: 0, caption: '이미지 3' },
+      { id: 4, imgSrc: '', scale: 1, x: 0, y: 0, caption: '이미지 4' },
+      { id: 5, imgSrc: '', scale: 1, x: 0, y: 0, caption: '이미지 5' },
+      { id: 6, imgSrc: '', scale: 1, x: 0, y: 0, caption: '이미지 6' }
     ];
 
     let subFields = [
@@ -409,7 +421,6 @@
       };
     }
 
-    // 박스 배경색 + 불투명도(0~100%) 동시 반영
     function updateBoxBg(boxKey) {
       const hex = document.getElementById(`c-${boxKey}-bg`).value;
       const opacityPct = Number(document.getElementById(`opacity-${boxKey}`).value);
@@ -591,13 +602,26 @@
       });
     }
 
-    /* ---------- 메인 박스 이미지 칸(1~6개) 관리 ---------- */
+    /* ---------- 메인 박스 이미지 칸 (고정 크기 + 확대/축소/이동 + 이름 칸 선택형) ---------- */
+    function toggleImageCaptions(checked) {
+      showImageCaptions = checked;
+      renderImageSlots();
+    }
+
     function addImageSlot() {
       if (imageSlots.length >= MAX_IMAGES) {
         alert('이미지는 최대 6개까지만 추가할 수 있습니다.');
         return;
       }
-      imageSlots.push({ id: Date.now() + Math.random(), imgSrc: '' });
+      const nextNum = imageSlots.length + 1;
+      imageSlots.push({
+        id: Date.now() + Math.random(),
+        imgSrc: '',
+        scale: 1,
+        x: 0,
+        y: 0,
+        caption: `이미지 ${nextNum}`
+      });
       renderImageSlots();
     }
 
@@ -612,9 +636,62 @@
       const reader = new FileReader();
       reader.onload = (e) => {
         imageSlots[index].imgSrc = e.target.result;
+        imageSlots[index].scale = 1;
+        imageSlots[index].x = 0;
+        imageSlots[index].y = 0;
         renderImageSlots();
       };
       reader.readAsDataURL(file);
+    }
+
+    function resetSlotImageTransform(index) {
+      imageSlots[index].scale = 1;
+      imageSlots[index].x = 0;
+      imageSlots[index].y = 0;
+      renderImageSlots();
+    }
+
+    function applyGalleryImgTransform(index) {
+      const slot = imageSlots[index];
+      const imgEl = document.getElementById(`gallery-img-${index}`);
+      if (imgEl && slot) {
+        imgEl.style.transform = `translate(${slot.x}px, ${slot.y}px) scale(${slot.scale})`;
+      }
+    }
+
+    function startDragGalleryImage(e, index) {
+      const slot = imageSlots[index];
+      if (!slot || !slot.imgSrc) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const origX = slot.x;
+      const origY = slot.y;
+
+      function onMouseMove(moveEvt) {
+        slot.x = Math.round(origX + (moveEvt.clientX - startX));
+        slot.y = Math.round(origY + (moveEvt.clientY - startY));
+        applyGalleryImgTransform(index);
+
+        const xSlider = document.getElementById(`slot-x-slider-${index}`);
+        const xVal = document.getElementById(`slot-x-val-${index}`);
+        const ySlider = document.getElementById(`slot-y-slider-${index}`);
+        const yVal = document.getElementById(`slot-y-val-${index}`);
+        if (xSlider) xSlider.value = Math.max(-150, Math.min(150, slot.x));
+        if (xVal) xVal.textContent = `${slot.x}px`;
+        if (ySlider) ySlider.value = Math.max(-150, Math.min(150, slot.y));
+        if (yVal) yVal.textContent = `${slot.y}px`;
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
     }
 
     function renderImageSlots() {
@@ -627,6 +704,7 @@
       gallery.className = `image-gallery count-${imageSlots.length}`;
 
       imageSlots.forEach((slot, idx) => {
+        // 1) 왼쪽 편집 카드
         const card = document.createElement('div');
         card.className = 'dynamic-item-card';
 
@@ -655,6 +733,9 @@
         clearBtn.textContent = '비우기';
         clearBtn.onclick = () => {
           imageSlots[idx].imgSrc = '';
+          imageSlots[idx].scale = 1;
+          imageSlots[idx].x = 0;
+          imageSlots[idx].y = 0;
           renderImageSlots();
         };
 
@@ -674,22 +755,138 @@
         btnGroup.appendChild(uploadBtn);
         btnGroup.appendChild(fileInput);
 
+        if (slot.imgSrc) {
+          const resetPosBtn = document.createElement('button');
+          resetPosBtn.className = 'btn';
+          resetPosBtn.textContent = '위치 초기화';
+          resetPosBtn.onclick = () => resetSlotImageTransform(idx);
+          btnGroup.appendChild(resetPosBtn);
+        }
+
         card.appendChild(topRow);
         card.appendChild(btnGroup);
+
+        // 이미지 이름(캡션) 입력칸 (체크박스 활성화 시 표시)
+        if (showImageCaptions) {
+          const capInput = document.createElement('input');
+          capInput.type = 'text';
+          capInput.value = slot.caption;
+          capInput.placeholder = '이미지 이름 입력';
+          capInput.oninput = (e) => {
+            imageSlots[idx].caption = e.target.value;
+            const capEl = document.getElementById(`gallery-caption-${idx}`);
+            if (capEl) capEl.textContent = e.target.value;
+          };
+          card.appendChild(capInput);
+        }
+
+        // 사진이 들어있으면 확대/축소 및 상하좌우 이동 슬라이더 표시
+        if (slot.imgSrc) {
+          const transformBox = document.createElement('div');
+          transformBox.className = 'img-transform-box';
+
+          // 확대/축소
+          const scaleRow = document.createElement('div');
+          scaleRow.className = 'blur-row';
+          const scalePct = Math.round(slot.scale * 100);
+          scaleRow.innerHTML = `<span>확대 / 축소</span>`;
+          const scaleInput = document.createElement('input');
+          scaleInput.type = 'range';
+          scaleInput.min = '50';
+          scaleInput.max = '250';
+          scaleInput.value = String(scalePct);
+          const scaleVal = document.createElement('span');
+          scaleVal.textContent = `${scalePct}%`;
+          scaleInput.oninput = (e) => {
+            const pct = Number(e.target.value);
+            imageSlots[idx].scale = pct / 100;
+            scaleVal.textContent = `${pct}%`;
+            applyGalleryImgTransform(idx);
+          };
+          scaleRow.appendChild(scaleInput);
+          scaleRow.appendChild(scaleVal);
+
+          // 좌우 이동
+          const xRow = document.createElement('div');
+          xRow.className = 'blur-row';
+          xRow.innerHTML = `<span>좌우 이동</span>`;
+          const xInput = document.createElement('input');
+          xInput.type = 'range';
+          xInput.id = `slot-x-slider-${idx}`;
+          xInput.min = '-150';
+          xInput.max = '150';
+          xInput.value = String(slot.x);
+          const xVal = document.createElement('span');
+          xVal.id = `slot-x-val-${idx}`;
+          xVal.textContent = `${slot.x}px`;
+          xInput.oninput = (e) => {
+            imageSlots[idx].x = Number(e.target.value);
+            xVal.textContent = `${imageSlots[idx].x}px`;
+            applyGalleryImgTransform(idx);
+          };
+          xRow.appendChild(xInput);
+          xRow.appendChild(xVal);
+
+          // 상하 이동
+          const yRow = document.createElement('div');
+          yRow.className = 'blur-row';
+          yRow.innerHTML = `<span>상하 이동</span>`;
+          const yInput = document.createElement('input');
+          yInput.type = 'range';
+          yInput.id = `slot-y-slider-${idx}`;
+          yInput.min = '-150';
+          yInput.max = '150';
+          yInput.value = String(slot.y);
+          const yVal = document.createElement('span');
+          yVal.id = `slot-y-val-${idx}`;
+          yVal.textContent = `${slot.y}px`;
+          yInput.oninput = (e) => {
+            imageSlots[idx].y = Number(e.target.value);
+            yVal.textContent = `${imageSlots[idx].y}px`;
+            applyGalleryImgTransform(idx);
+          };
+          yRow.appendChild(yInput);
+          yRow.appendChild(yVal);
+
+          transformBox.appendChild(scaleRow);
+          transformBox.appendChild(xRow);
+          transformBox.appendChild(yRow);
+          card.appendChild(transformBox);
+        }
+
         editorWrap.appendChild(card);
 
+        // 2) 오른쪽 미리보기 캔버스 셀
         const cell = document.createElement('div');
         cell.className = 'gallery-cell';
+
+        const viewport = document.createElement('div');
+        viewport.className = `gallery-img-viewport ${slot.imgSrc ? 'has-image' : ''}`;
+
         if (slot.imgSrc) {
           const img = document.createElement('img');
+          img.id = `gallery-img-${idx}`;
           img.src = slot.imgSrc;
-          cell.appendChild(img);
+          img.style.transform = `translate(${slot.x}px, ${slot.y}px) scale(${slot.scale})`;
+          viewport.appendChild(img);
+          viewport.onmousedown = (e) => startDragGalleryImage(e, idx);
         } else {
           const empty = document.createElement('span');
           empty.className = 'gallery-empty-text';
           empty.textContent = `이미지 ${idx + 1}`;
-          cell.appendChild(empty);
+          viewport.appendChild(empty);
         }
+
+        cell.appendChild(viewport);
+
+        if (showImageCaptions) {
+          const capDiv = document.createElement('div');
+          capDiv.className = 'gallery-caption';
+          capDiv.id = `gallery-caption-${idx}`;
+          capDiv.textContent = slot.caption;
+          cell.appendChild(capDiv);
+        }
+
         gallery.appendChild(cell);
       });
     }
